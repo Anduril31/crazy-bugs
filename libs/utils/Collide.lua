@@ -9,6 +9,7 @@ local Collide = {}
 Collide.isPointInsideBox = function(posX, posY, box, tolerance)
     -- Default value
     tolerance = tolerance or 0
+    -- TODO bug sur gestion tolerance
 
     if (tolerance >= 0) then
         boxPosX = box.x + tolerance

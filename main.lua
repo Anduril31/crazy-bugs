@@ -1,30 +1,39 @@
-love.graphics.setDefaultFilter("nearest", "nearest")
+--love.graphics.setDefaultFilter("nearest", "nearest")
 
 -- Valeur de "zoom" par défaut
-SCALE = 1
+SCALE = 1.2
 
 -- Chargement lib utilitaire
 Utils = require("libs.utils.Utils")
 Collide = require("libs.utils.Collide")
 EffectManager = require("libs.utils.EffectManager")
+Gui = require("libs.utils.Gui")
 
 -- Chargement du scene manager 
 SceneManager = require('SceneManager')
 
+fontTitle, fontDefault, fontDebug = nil, nil, nil
 
 function love.load()
     --love.window.setFullscreen(true, "desktop")
 
     -- Ajout des scènes
     SceneManager.addScene('menu');
-    SceneManager.addScene('poc_controller');
+    --SceneManager.addScene('select_game');
+    SceneManager.addScene('game');
+
     --SceneManager.addScene('game');
 
     -- Définition de de la scène par défaut
-    SceneManager.setCurrentSceneName('poc_controller')
+    SceneManager.setCurrentSceneName('menu')
+
+
+    -- Chargement des ressources communes
+    fontTitle = love.graphics.newFont('Fonts/Xolonium-Bold.ttf', 30)
+    fontDefault = love.graphics.newFont('Fonts/Xolonium-Regular.ttf', 16)
+    fontDebug = love.graphics.newFont('Fonts/Xolonium-Regular.ttf', 10)
 
     SceneManager.load()
-
 end
 
 function love.update(dt)
@@ -32,6 +41,7 @@ function love.update(dt)
 end
 
 function love.draw()
+    love.graphics.scale(SCALE, SCALE)
     local color = {}
 
     color = Utils.ColorFromRgb(89, 105, 91)
@@ -69,3 +79,5 @@ end
 function love.mousefocus( focus )
     SceneManager.mousefocus(focus)
 end
+
+

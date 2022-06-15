@@ -26,7 +26,7 @@ end
 
 
 function love.conf(t)
-    t.window.title = "Crazy Bugs v"..APP_VERSION         -- The window title (string)
+    t.window.title = "Crazy Bugs "..APP_VERSION         -- The window title (string)
     t.window.width = 1024
     t.window.height = 768
 

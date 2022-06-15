@@ -53,8 +53,8 @@ Tuile.generateTuiles = function()
         Tuile.element.map = tuileMaps[i]
         Tuile.w = Tuile.element.w * 3
         Tuile.h = Tuile.element.h * 3
-        Tuile.x = 300 + ( Tuile.w * (i-1) ) + ( (i-1) * 18 )
-        Tuile.y = 650
+        Tuile.x = 45 + ( Tuile.w * (i-1) ) + ( (i-1) * 22)
+        Tuile.y = love.graphics.getHeight()/SCALE-(Tuile.h + 10)
         Tuile.originX = Tuile.x
         Tuile.originY = Tuile.y
         -- Rotation de la tuile
@@ -89,10 +89,27 @@ Tuile.generateTuiles = function()
             posX = posX or Tuile.x
             posY = posY or Tuile.y
 
+            -- Dessin des emplacements d'origine
+            -- Save curent color
+            local r, g, b, a = love.graphics.getColor()
+            local color = Utils.ColorFromRgb(48, 48, 48)
+            
+            love.graphics.setColor(color.r, color.g, color.b, 0.85)
+            love.graphics.rectangle('fill', Tuile.originX , Tuile.originY, Tuile.w, Tuile.h)
+
             local map = Tuile.element.map[Tuile.rotation]
             for l=1, #map do
                 for c=1, #map[l] do
                     if map[l][c] == 1 then
+                        
+                        love.graphics.setColor(color.r, color.g, color.b)
+                        love.graphics.rectangle(
+                            'fill', 
+                            posX + (c-1) * Tuile.element.w, 
+                            posY + (l-1) * Tuile.element.h,
+                            Tuile.element.w, Tuile.element.h
+                        )
+                        love.graphics.setColor(r ,g, b, 0.90)
                         love.graphics.draw(
                             Tuile.img, 
                             posX + (c-1)*Tuile.element.w, posY + (l-1)*Tuile.element.h, 
@@ -109,22 +126,5 @@ Tuile.generateTuiles = function()
 
     return lstTuiles
 end
-
---[[
-Tuile.init = function()
-    Tuile.img = love.graphics.newImage("Images/rock.png")
-    Tuile.x = 450
-    Tuile.y = 650
-    Tuile.originX = Tuile.x
-    Tuile.originY = Tuile.y
-    Tuile.element.w = Tuile.img:getWidth() * SCALE
-    Tuile.element.h = Tuile.img:getHeight() * SCALE
-    Tuile.w = Tuile.element.w * 3
-    Tuile.h = Tuile.element.h * 3
-    Tuile.cursorLocked = false
-    Tuile.caseId = nil
-end
-]]--
-
 
 return Tuile

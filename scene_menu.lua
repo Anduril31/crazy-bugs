@@ -1,18 +1,12 @@
 
 menu = {}
 
-local fontTitle = nil 
 local tweening = {}
 
 menu.load = function()
     if (APP_DEBUG) then
         print("Scene menu.load()")
     end
-    -- Chargement des ressources communes
-    fontTitle = love.graphics.newFont( 'Fonts/emulogic.ttf', 24)
-    fontDefault = love.graphics.newFont( 'Fonts/emulogic.ttf', 12)
-    fontDebug = love.graphics.newFont( 'Fonts/emulogic.ttf', 9)
-    
 
 
     menu.initTween()
@@ -28,7 +22,7 @@ menu.initTween = function()
     tweening[2] = {}
     tweening[2].time = 0
     tweening[2].value = -150
-    tweening[2].distance = 510
+    tweening[2].distance = (love.graphics.getWidth()+60/SCALE)/2
     tweening[2].duration = 0.5
 end
 
@@ -54,11 +48,15 @@ menu.draw = function()
     --love.graphics.setColor(252, 227, 0)
     love.graphics.setFont(fontTitle)
 
-    local sTitre = "Titre du jeu"
+    local sTitre = "Crazy Bugs"
     local w = fontTitle:getWidth(sTitre)
-    -- local h = fontTitle:getHeight(sTitre)
-    love.graphics.print(sTitre, (love.graphics.getWidth() - w) / 2, tween)
-    love.graphics.rectangle('fill', (love.graphics.getWidth() - w) / 2, 150, w, 25)
+    love.graphics.print(sTitre, ((love.graphics.getWidth() - w)/SCALE) / 2, tween)
+    love.graphics.rectangle('fill', ((love.graphics.getWidth() - w))/SCALE / 2, 160, w, 25)
+    
+    love.graphics.setFont(fontDebug)
+    local sCredit = "Sound Effect by @BurghRecords"
+    w = fontDebug:getWidth(sCredit)
+    love.graphics.print(sCredit, (love.graphics.getWidth() - w)/SCALE / 2, love.graphics.getHeight()/SCALE - 20)
     
     if tweening[1].time > tweening[1].duration then
         love.graphics.setFont(fontDefault)
@@ -70,7 +68,7 @@ end
 menu.keypressed = function(key)
     -- P pour lancer la partie
     if (key == 'p') then
-        SceneManager.switch('poc_controller')
+        SceneManager.switch('game')
     end
     if (key == 'escape') then
         love.event.quit()
