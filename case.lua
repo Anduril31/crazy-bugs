@@ -103,4 +103,8 @@ Case.getCaseList = function()
     return caseList
 end
 
+Case.getCaseImgs = function()
+    return imgs
+end
+
 return Case

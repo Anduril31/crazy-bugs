@@ -16,6 +16,10 @@ local caseList = {}
 
 local imgBeetle = {}
 local imgBackground = {}
+local caseImgs = {}
+
+local tCompteur = {}
+local currentDefi = 0
 
 game.load = function()
     if (APP_DEBUG) then
@@ -48,6 +52,7 @@ game.load = function()
     Case.createCase(200, (150 + 108*SCALE + 18), 108*SCALE, 108*SCALE, 3)
     Case.createCase((200 + 108*SCALE + 18), (150 + 108*SCALE + 18), 108*SCALE, 108*SCALE, 4)
     caseList = Case.getCaseList()
+    caseImgs = Case.getCaseImgs()
 
     
     grpButtons = Gui.newGroup()
@@ -56,6 +61,7 @@ game.load = function()
     btnCancel = Gui.newButton(panelButtons.X + 10, panelButtons.Y + 48, 150, 28, "Abandonner", fontDefault)
     btnCancel:setEvent("hover", game.onButtonHover)
     btnTestSolution:setEvent("hover", game.onButtonHover)
+    btnTestSolution:setEvent("pressed", game.onButtonPressedTestSolution)
     grpButtons:addElement(panelTest)
     grpButtons:addElement(btnCancel)
     grpButtons:addElement(btnTestSolution)
@@ -63,12 +69,73 @@ game.load = function()
 
     -- TODO
     -- Defi numero
+    currentDefi = 1
+    tDefi = {
+        {5, 0, 0, 0, 0},
+        {0, 0, 0, 0, 5},
+        {0, 0, 4, 0, 0},
+    }
+
+    -- Compteur de solution
+    tCompteur = {
+        0, 0, 0, 0, 0
+    }
 end
 
 game.onButtonHover = function (pState)
-    print("Button is hover :"..pState)
+    if (APP_DEBUG) then print("Button is hover :"..pState) end
 end
 
+game.onButtonPressedTestSolution = function (pState)
+    if (APP_DEBUG) then print("Button test solution is pressed : "..pState) end
+    -- Vérifie que la solution est correcte
+    -- toute les cases sont occupées
+    -- pour chaque case, on compte les insectes non recouvert par la tuile
+    -- on compare le nombre d'insectes par rapport au défi
+    
+    tCompteur = {
+        0, 0, 0, 0, 0
+    }
+
+    for i, case in ipairs(caseList) do
+        -- La case n'est pas occupée solution incorrecte
+        if not case.isOccupied then 
+            return false 
+        end
+
+        for i, tuile in ipairs(tuileList) do
+            if tuile.caseId == case.id then
+                local tElements = tuile.element.map[tuile.rotation]
+                for l=1, #tElements do
+                    for c=1, #tElements[l] do
+                        if tElements[l][c] == 0 then -- Pas de cailloux on regarde dessous
+                            caseElement = case.map[l][c]
+                            if (caseElement ~= 0) then
+                                tCompteur[caseElement] = tCompteur[caseElement] + 1
+                            end
+                        end
+                    end
+                end
+                break -- On sort de la boucle for
+            end
+        end
+    end
+
+    -- vérifie le résultat
+    for i, v in ipairs(tDefi[currentDefi]) do
+        if tCompteur[i] ~= v then
+            return false -- La solution est incorrecte
+        end
+    end
+    
+    -- Solution correcte
+    print "Correct !"
+
+    if currentDefi < #tDefi then
+        currentDefi = currentDefi + 1
+    end
+    return true
+end
 
 game.unload = function()
     if (APP_DEBUG) then
@@ -143,24 +210,51 @@ game.draw = function()
         case.draw(cursorLocked)
     end
 
-    local sDefi = "DEFI 1"
+
+
+    local sDefi = "DEFI ".. currentDefi
     local sObjectif = "OBJECTIF"
     local w = fontTitle:getWidth(sObjectif)
+
+    local color = Utils.ColorFromRgb(48, 48, 48)
+    love.graphics.setColor(color.r, color.g, color.b, 0.85)
+    love.graphics.rectangle( 
+        "fill", 
+        (love.graphics.getWidth() - w - 40)/SCALE,
+        80,
+        170,
+        (love.graphics.getHeight() - 110)/SCALE
+    )
+
+    color = Utils.ColorFromRgb(210, 247, 216)
+    love.graphics.setColor(color.r, color.g, color.b)
+
+    
     love.graphics.print(sDefi, (love.graphics.getWidth() - (w + 20))/SCALE,  100)
     love.graphics.print(sObjectif, (love.graphics.getWidth() - (w + 20))/SCALE,  150)
 
-    love.graphics.draw(
-        imgBeetle.img, 
-        (love.graphics.getWidth() - (w + 20))/SCALE, 
-        200,
-        0, -- rotation
-        SCALE, SCALE
-    )
-    love.graphics.print(
-        "x 5", 
-        (love.graphics.getWidth() - (w + 20))/SCALE + imgBeetle.w/SCALE + 20,
-        200 + (imgBeetle.w/SCALE)/2
-    )
+    local index = 1
+    for i, objectif in ipairs(tDefi[currentDefi]) do
+        if (objectif ~= 0) then
+            -- image de l'insecte
+            love.graphics.draw(
+                caseImgs[i], 
+                (love.graphics.getWidth() - (w + 20))/SCALE, 
+                150 + (index * 50),
+                0, -- rotation
+                SCALE, SCALE
+            )
+            -- nombre d'insectes
+            love.graphics.print(
+                "x "..objectif, 
+                (love.graphics.getWidth() - (w + 20))/SCALE + imgBeetle.w/SCALE + 20,
+                150 + (index * 50) + (imgBeetle.w/SCALE)/2
+            ) 
+            
+            index = index + 1
+        end
+    end
+    
 
     grpButtons:draw()
 
