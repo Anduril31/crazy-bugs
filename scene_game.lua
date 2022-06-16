@@ -14,8 +14,8 @@ local tuileList = {}
 local Case = require("case")
 local caseList = {}
 
-local imgBeetle = {}
 local imgBackground = {}
+local imgTitle = {}
 local caseImgs = {}
 
 local tCompteur = {}
@@ -38,10 +38,11 @@ game.load = function()
     
 
     -- Graphique
-    imgBeetle.img = love.graphics.newImage("Images/beetle.png")
-    imgBeetle.w = imgBeetle.img:getWidth()
-    imgBeetle.h = imgBeetle.img:getHeight()
+    --imgBeetle.img = love.graphics.newImage("Images/beetle.png")
+    --imgBeetle.w = imgBeetle.img:getWidth()
+    --imgBeetle.h = imgBeetle.img:getHeight()
     imgBackground.img = love.graphics.newImage("Images/background.png")
+    imgTitle.img = love.graphics.newImage("Images/title.png")
 
     -- Création /initialisation de la tuile
     tuileList = Tuile.generateTuiles()
@@ -232,21 +233,21 @@ game.draw = function()
     color = Utils.ColorFromRgb(70, 63, 50)
     love.graphics.setBackgroundColor(color.r, color.g, color.b)
 
+    -- Affichage du background
     love.graphics.draw(
         imgBackground.img, 
         0, 
         0
     )
     
-    color = Utils.ColorFromRgb(210, 247, 216)
-    love.graphics.setColor(color.r, color.g, color.b)
+    -- Affichage du titre
+    love.graphics.draw(
+        imgTitle.img, 
+        120, 
+        20
+    )
     
-    love.graphics.setFont(fontTitle)
-    local sTitre = "Crazy Bugs"
-    local w = fontTitle:getWidth(sTitre)
-    love.graphics.print(sTitre, ((love.graphics.getWidth() - w)/SCALE) / 2, 20)
-    love.graphics.setFont(fontDefault)
-    
+       
     -- Dessin des cases
     -- TODO recherche equivalent d'un REDUCE en JS
     local cursorLocked = false
@@ -259,7 +260,9 @@ game.draw = function()
         case.draw(cursorLocked)
     end
 
-
+    color = Utils.ColorFromRgb(210, 247, 216)
+    love.graphics.setColor(color.r, color.g, color.b)
+    love.graphics.setFont(fontDefault)
 
     local sDefi = "DEFI"
     local sCurrentDefi = currentDefi .. " / " .. #tDefis
@@ -298,8 +301,8 @@ game.draw = function()
             -- nombre d'insectes
             love.graphics.print(
                 "x "..objectif, 
-                (love.graphics.getWidth() - (w + 20))/SCALE + imgBeetle.w/SCALE + 20,
-                150 + (index * 50) + (imgBeetle.w/SCALE)/2
+                (love.graphics.getWidth() - (w + 20))/SCALE + caseImgs[i]:getWidth()/SCALE + 20,
+                150 + (index * 50) + (caseImgs[i]:getWidth()/SCALE)/2
             ) 
             
             index = index + 1
@@ -328,8 +331,8 @@ game.draw = function()
         end
     end
    
-    love.graphics.print("X: " .. mousePosX, 10, 10)
-    love.graphics.print("Y: " .. mousePosY, 10, 30)
+    --love.graphics.print("X: " .. mousePosX, 10, 10)
+    --love.graphics.print("Y: " .. mousePosY, 10, 30)
 end 
 
 
