@@ -16,6 +16,18 @@ fontTitle, fontDefault, fontDebug = nil, nil, nil
 
 function love.load()
     --love.window.setFullscreen(true, "desktop")
+    if (APP_DEBUG) then 
+        print(love.filesystem.getSaveDirectory())
+    end
+    
+    -- Création du fichier de sauvegarde s'il n'existe pas
+    info = love.filesystem.getInfo( 'save.cb', info )
+    if info == nil then
+        local success, message = love.filesystem.write( 'save.cb', "")
+        if not success then 
+            print ('Impossible de créer le fichier de sauvegarde : '..message)
+        end
+    end
 
     -- Ajout des scènes
     SceneManager.addScene('menu');
@@ -26,7 +38,6 @@ function love.load()
 
     -- Définition de de la scène par défaut
     SceneManager.setCurrentSceneName('menu')
-
 
     -- Chargement des ressources communes
     fontTitle = love.graphics.newFont('Fonts/Xolonium-Bold.ttf', 30)

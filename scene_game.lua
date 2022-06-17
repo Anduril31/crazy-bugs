@@ -18,6 +18,7 @@ local imgBackground = {}
 local imgTitle = {}
 local caseImgs = {}
 
+local tDefis = require("defis")
 local tCompteur = {}
 local currentDefi = 0
 
@@ -26,9 +27,6 @@ game.load = function()
         print("Scene game.load()")
     end
 
-    --love.mouse.setCursor(
-    --    love.mouse.newCursor("Images/scorpion.png", 0, 0)
-    --)
     -- Musique
     music = love.audio.newSource("Sounds/ForestAmbience.mp3", "stream")
     music:setLooping(true)
@@ -36,15 +34,14 @@ game.load = function()
     music:setVolume(0.25)
     music:play()
     
-
     -- Graphique
-    --imgBeetle.img = love.graphics.newImage("Images/beetle.png")
-    --imgBeetle.w = imgBeetle.img:getWidth()
-    --imgBeetle.h = imgBeetle.img:getHeight()
+
+    -- Background
     imgBackground.img = love.graphics.newImage("Images/background.png")
+    -- Titre
     imgTitle.img = love.graphics.newImage("Images/title.png")
 
-    -- Création /initialisation de la tuile
+    -- Création / Initialisation de la Tuile
     tuileList = Tuile.generateTuiles()
 
     -- Création initialisation des cases
@@ -52,98 +49,46 @@ game.load = function()
     Case.createCase((200 + 108*SCALE + 18), 150, 108, 108, 2)
     Case.createCase(200, (150 + 108*SCALE + 18), 108*SCALE, 108*SCALE, 3)
     Case.createCase((200 + 108*SCALE + 18), (150 + 108*SCALE + 18), 108*SCALE, 108*SCALE, 4)
+
     caseList = Case.getCaseList()
     caseImgs = Case.getCaseImgs()
 
-    
+    -- UI
     grpButtons = Gui.newGroup()
     panelButtons = Gui.newPanel(love.graphics.getWidth()/SCALE-180, love.graphics.getHeight()/SCALE-96, 170, 86)
     btnTestSolution = Gui.newButton(panelButtons.X + 10, panelButtons.Y + 10, 150, 28, "Vérifier", fontDefault)
     btnCancel = Gui.newButton(panelButtons.X + 10, panelButtons.Y + 48, 150, 28, "Abandonner", fontDefault)
-    btnCancel:setEvent("hover", game.onButtonHover)
-    btnTestSolution:setEvent("hover", game.onButtonHover)
+    btnCancel:setEvent("pressed", game.onButtonPressedCancel)
     btnTestSolution:setEvent("pressed", game.onButtonPressedTestSolution)
     grpButtons:addElement(panelTest)
     grpButtons:addElement(btnCancel)
     grpButtons:addElement(btnTestSolution)
+    
     -- Definition de l'objectif
 
     -- TODO
     -- Defi numero
-    currentDefi = 48
-    tDefis = {
-        -- DEBUTANT
-        {5, 0, 0, 0, 0}, -- Defi 1
-        {0, 0, 0, 0, 5}, -- Defi 2
-        {0, 0, 4, 0, 0}, -- Defi 3
-        {0, 4, 0, 3, 0}, -- Defi 4
-        {0, 0, 1, 0, 6}, -- Defi 5
-        {0, 0, 3, 3, 0}, -- Defi 6
-        {3, 0, 0, 4, 0}, -- Defi 7
-        {0, 1, 3, 0, 0}, -- Defi 8
-        {3, 0, 4, 0, 0}, -- Defi 9
-        {0, 0, 0, 3, 2}, -- Defi 10
-        {0, 0, 1, 0, 2}, -- Defi 11
-        {0, 0, 4, 0, 3}, -- Defi 12
-        -- JUNIOR
-        {1, 0, 0, 0, 3}, -- Defi 13
-        {2, 0, 2, 0, 0}, -- Defi 14
-        {2, 0, 0, 5, 0}, -- Defi 15
-        {0, 2, 0, 1, 1}, -- Defi 16
-        {2, 0, 3, 2, 2}, -- Defi 17
-        {1, 0, 0, 1, 1}, -- Defi 18
-        {2, 5, 0, 0, 0}, -- Defi 19
-        {0, 1, 1, 0, 1}, -- Defi 20
-        {3, 2, 3, 1, 0}, -- Defi 21
-        {1, 1, 0, 1, 0}, -- Defi 22
-        {0, 1, 4, 0, 1}, -- Defi 23
-        {1, 0, 0, 2, 1}, -- Defi 24
-        -- EXPERT
-        {1, 0, 1, 0, 4}, -- Defi 25
-        {0, 1, 4, 1, 0}, -- Defi 26
-        {0, 3, 0, 3, 1}, -- Defi 27
-        {4, 1, 3, 0, 0}, -- Defi 28
-        {3, 0, 2, 3, 0}, -- Defi 29
-        {1, 0, 3, 2, 0}, -- Defi 30
-        {2, 0, 0, 2, 1}, -- Defi 31
-        {0, 0, 3, 3, 1}, -- Defi 32
-        {1, 2, 0, 0, 1}, -- Defi 33
-        {0, 2, 2, 4, 0}, -- Defi 34
-        {2, 0, 3, 3, 0}, -- Defi 35
-        {1, 2, 0, 2, 0}, -- Defi 36
-        -- MAITRE
-        {2, 2, 1, 3, 1}, -- Defi 37
-        {4, 1, 0, 0, 1}, -- Defi 38
-        {3, 0, 0, 2, 2}, -- Defi 39
-        {0, 0, 1, 3, 2}, -- Defi 40
-        {4, 0, 2, 0, 1}, -- Defi 41
-        {1, 4, 0, 0, 1}, -- Defi 42
-        {4, 1, 0, 0, 1}, -- Defi 43
-        {0, 3, 3, 1, 0}, -- Defi 44
-        {2, 2, 2, 0, 2}, -- Defi 45
-        {1, 1, 4, 1, 0}, -- Defi 46
-        {2, 2, 3, 0, 0}, -- Defi 47
-        {3, 1, 1, 1, 2}, -- Defi 48
-    }
-
-    -- Compteur de solution
-    tCompteur = {
-        0, 0, 0, 0, 0
-    }
+    file = love.filesystem.newFile("save.cb")
+    file:open("r")
+    data = file:read()
+    file:close()
+    if (tonumber(data) == nil) then
+        currentDefi = 1
+    else
+        currentDefi = tonumber(data)
+    end
 end
 
-game.onButtonHover = function (pState)
+-- Bouton abandonner (retour au menu)
+game.onButtonPressedCancel = function (pState)
     if (APP_DEBUG) then print("Button is hover :"..pState) end
+    SceneManager.switch('menu')
 end
 
 game.onButtonPressedTestSolution = function (pState)
     if (APP_DEBUG) then print("Button test solution is pressed : "..pState) end
-    -- Vérifie que la solution est correcte
-    -- toute les cases sont occupées
-    -- pour chaque case, on compte les insectes non recouvert par la tuile
-    -- on compare le nombre d'insectes par rapport au défi
     
-    tCompteur = {
+    local tCompteur = {
         0, 0, 0, 0, 0
     }
 
@@ -179,18 +124,21 @@ game.onButtonPressedTestSolution = function (pState)
     end
     
     -- Solution correcte
-    print "Correct !"
-
+    -- Passage au défi suivant
     if currentDefi < #tDefis then
         currentDefi = currentDefi + 1
+        -- Enregistrement de l'avancement
+        file = love.filesystem.newFile("save.cb")
+        file:open("w")
+        data = file:write(currentDefi)
+        file:close()
     end
     return true
 end
 
 game.unload = function()
-    if (APP_DEBUG) then
-        print("Scene game.unload()")
-    end
+    if (APP_DEBUG) then print("Scene game.unload()") end
+    music:stop()
 end
 
 

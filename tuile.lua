@@ -38,6 +38,8 @@ table.insert(tuileMaps,
 )
 
 Tuile.generateTuiles = function()
+    lstTuiles = {}
+    
     local i
     for i=1, MAX_TUILES do
         local Tuile = {}

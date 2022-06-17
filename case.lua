@@ -8,7 +8,7 @@ table.insert(imgs, love.graphics.newImage("Images/cockroach.png")); -- 3
 table.insert(imgs, love.graphics.newImage("Images/scorpion.png")); -- 4
 table.insert(imgs, love.graphics.newImage("Images/worm.png")); -- 5
 
--- Toute les vignette font la meme taille 
+-- Toute les vignettes font la meme taille 
 local elementWidth = love.graphics.newImage("Images/worm.png"):getWidth();
 local elementHeight = love.graphics.newImage("Images/worm.png"):getHeight();
 
