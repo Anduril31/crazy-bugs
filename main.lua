@@ -13,13 +13,15 @@ Gui = require("libs.utils.Gui")
 SceneManager = require('SceneManager')
 
 fontTitle, fontDefault, fontDebug = nil, nil, nil
+GameMode = "NORMAL" -- NORMAL, DEFI
+LevelChoice = 1 -- Choix du niveau par défaut
 
 function love.load()
     --love.window.setFullscreen(true, "desktop")
     if (APP_DEBUG) then 
         print(love.filesystem.getSaveDirectory())
     end
-    
+
     -- Création du fichier de sauvegarde s'il n'existe pas
     info = love.filesystem.getInfo( 'save.cb', info )
     if info == nil then
@@ -31,7 +33,7 @@ function love.load()
 
     -- Ajout des scènes
     SceneManager.addScene('menu');
-    --SceneManager.addScene('select_game');
+    SceneManager.addScene('level');
     SceneManager.addScene('game');
 
     --SceneManager.addScene('game');
@@ -43,6 +45,15 @@ function love.load()
     fontTitle = love.graphics.newFont('Fonts/Xolonium-Bold.ttf', 30)
     fontDefault = love.graphics.newFont('Fonts/Xolonium-Regular.ttf', 16)
     fontDebug = love.graphics.newFont('Fonts/Xolonium-Regular.ttf', 10)
+
+    
+    -- Musique
+    music = love.audio.newSource("Sounds/ForestAmbience.mp3", "stream")
+    music:setLooping(true)
+    music:setPitch(0.75)
+    music:setVolume(0.25)
+    music:play()
+
 
     SceneManager.load()
 end
@@ -65,7 +76,6 @@ function love.draw()
 end
 
 function love.keypressed(key)
- 
     if (APP_DEBUG) then
         -- Panic button to quit
         if (key == 'escape') then

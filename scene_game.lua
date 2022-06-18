@@ -14,6 +14,9 @@ local tuileList = {}
 local Case = require("case")
 local caseList = {}
 
+local SnailManager = require('SnailManager')
+local snail = nil;
+
 local imgBackground = {}
 local imgTitle = {}
 local caseImgs = {}
@@ -27,19 +30,16 @@ game.load = function()
         print("Scene game.load()")
     end
 
-    -- Musique
-    music = love.audio.newSource("Sounds/ForestAmbience.mp3", "stream")
-    music:setLooping(true)
-    music:setPitch(0.75)
-    music:setVolume(0.25)
-    music:play()
-    
+   
     -- Graphique
 
     -- Background
     imgBackground.img = love.graphics.newImage("Images/background.png")
     -- Titre
     imgTitle.img = love.graphics.newImage("Images/title.png")
+
+    -- Création de l'escargot
+    snail = SnailManager.createSnail(470, 555, 250, 500)
 
     -- Création / Initialisation de la Tuile
     tuileList = Tuile.generateTuiles()
@@ -56,27 +56,55 @@ game.load = function()
     -- UI
     grpButtons = Gui.newGroup()
     panelButtons = Gui.newPanel(love.graphics.getWidth()/SCALE-180, love.graphics.getHeight()/SCALE-96, 170, 86)
-    btnTestSolution = Gui.newButton(panelButtons.X + 10, panelButtons.Y + 10, 150, 28, "Vérifier", fontDefault)
-    btnCancel = Gui.newButton(panelButtons.X + 10, panelButtons.Y + 48, 150, 28, "Abandonner", fontDefault)
+    color = Utils.ColorFromRgb(87, 168, 50)
+    btnTestSolution = Gui.newButton(
+        panelButtons.X + 10, panelButtons.Y + 10, 
+        150, 28, 
+        "Vérifier", fontDefault,
+        {247, 247, 216},
+        {color['r'], color['g'], color['b']}
+    )
+    btnCancel = Gui.newButton(
+        panelButtons.X + 10, panelButtons.Y + 48,
+         150, 28, 
+         "Abandonner", fontDefault,
+        {247, 247, 216},
+        {color['r'], color['g'], color['b']}
+    )
     btnCancel:setEvent("pressed", game.onButtonPressedCancel)
     btnTestSolution:setEvent("pressed", game.onButtonPressedTestSolution)
-    grpButtons:addElement(panelTest)
+    --grpButtons:addElement(panelButtons)
     grpButtons:addElement(btnCancel)
     grpButtons:addElement(btnTestSolution)
-    
-    -- Definition de l'objectif
 
-    -- TODO
     -- Defi numero
-    file = love.filesystem.newFile("save.cb")
-    file:open("r")
-    data = file:read()
-    file:close()
-    if (tonumber(data) == nil) then
-        currentDefi = 1
-    else
-        currentDefi = tonumber(data)
+    currentDefi = Utils.readSave()
+
+    if GameMode == "LEVEL" then
+        currentDefi = LevelChoice
     end
+end
+
+game.changeLevel = function()
+    -- Passage au défi suivant
+    if (GameMode == "NORMAL") then
+        if currentDefi < #tDefis then
+            currentDefi = currentDefi + 1
+            Utils.save(currentDefi)
+        end
+    else -- GameMode == LEVEL
+        if currentDefi < #tDefis then
+            local maxLevel = Utils.readSave()
+            currentDefi = currentDefi + 1
+            if currentDefi > maxLevel then
+                GameMode = "NORMAL"
+                Utils.save(currentDefi)
+            end
+        end
+    end
+
+    -- Réinitialise les tuiles
+    tuileList = Tuile.generateTuiles()
 end
 
 -- Bouton abandonner (retour au menu)
@@ -85,9 +113,7 @@ game.onButtonPressedCancel = function (pState)
     SceneManager.switch('menu')
 end
 
-game.onButtonPressedTestSolution = function (pState)
-    if (APP_DEBUG) then print("Button test solution is pressed : "..pState) end
-    
+game.checkSolution = function()
     local tCompteur = {
         0, 0, 0, 0, 0
     }
@@ -124,21 +150,18 @@ game.onButtonPressedTestSolution = function (pState)
     end
     
     -- Solution correcte
-    -- Passage au défi suivant
-    if currentDefi < #tDefis then
-        currentDefi = currentDefi + 1
-        -- Enregistrement de l'avancement
-        file = love.filesystem.newFile("save.cb")
-        file:open("w")
-        data = file:write(currentDefi)
-        file:close()
-    end
     return true
+end
+
+game.onButtonPressedTestSolution = function (pState)
+    if (APP_DEBUG) then print("Button test solution is pressed : "..pState) end
+    if (game.checkSolution()) then
+        game.changeLevel()
+    end
 end
 
 game.unload = function()
     if (APP_DEBUG) then print("Scene game.unload()") end
-    music:stop()
 end
 
 
@@ -165,8 +188,10 @@ game.update = function(dt)
         Tuile.update(dt)
     end
     
+    snail.update(dt)
+
     -- Ordonnancement des tuiles pour s'assurer que la tuile
-    -- accorcher au curseur est toujours affiché en dernier
+    -- accrocher au curseur est toujours affichée en dernier
     table.sort(
         tuileList,
         function(a, b)
@@ -177,8 +202,7 @@ end
 
 
 game.draw = function()
-    local color = {}
-    color = Utils.ColorFromRgb(70, 63, 50)
+    local color = Utils.ColorFromRgb(70, 63, 50)
     love.graphics.setBackgroundColor(color.r, color.g, color.b)
 
     -- Affichage du background
@@ -191,11 +215,14 @@ game.draw = function()
     -- Affichage du titre
     love.graphics.draw(
         imgTitle.img, 
-        120, 
+        (love.graphics.getWidth()/SCALE - imgTitle.img:getWidth())/2, 
         20
     )
+
+
+    -- Affichage de l'escargot
+    snail.draw()
     
-       
     -- Dessin des cases
     -- TODO recherche equivalent d'un REDUCE en JS
     local cursorLocked = false
@@ -222,9 +249,9 @@ game.draw = function()
     love.graphics.rectangle( 
         "fill", 
         (love.graphics.getWidth() - w - 40)/SCALE,
-        80,
+        100,
         170,
-        (love.graphics.getHeight() - 110)/SCALE
+        (love.graphics.getHeight() - 90)/SCALE
     )
 
     color = Utils.ColorFromRgb(210, 247, 216)

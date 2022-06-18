@@ -57,13 +57,15 @@ function Gui.newText(pX, pY, pW, pH, pText, pFont, pHAlign, pVAlign, pColor)
     return myText
   end
 
-function Gui.newPanel(pX, pY, pW, pH)
+function Gui.newPanel(pX, pY, pW, pH, pBgColor, pBorderColor)
     local myPanel = newElement(pX, pY)
     myPanel.W = pW
     myPanel.H = pH
     myPanel.Image = nil
     myPanel.isHover = false
     myPanel.lstEvents = {}
+    myPanel.BgColor = pBgColor or nil
+    myPanel.BorderColor = pBorderColor or nil
   
     function myPanel:setImage(pImage)
         self.Image = pImage
@@ -97,12 +99,25 @@ function Gui.newPanel(pX, pY, pW, pH)
     end
 
     function myPanel:drawPanel()
-        love.graphics.setColor(255,255,255)
+        love.graphics.setColor(1,1,1)
         if self.Image == nil then
+            if self.BgColor ~= nil then
+                if #self.BgColor == 4 then -- RGBA
+                    love.graphics.setColor(self.BgColor[1]/255, self.BgColor[2]/255, self.BgColor[3]/255, self.BgColor[4])
+                else
+                    love.graphics.setColor(self.BgColor[1]/255, self.BgColor[2]/255, self.BgColor[3]/255)
+                end
+                love.graphics.rectangle("fill", self.X, self.Y, self.W, self.H)
+            end
+            if self.BorderColor ~= nil then
+                love.graphics.setColor(self.BorderColor[1]/255, self.BorderColor[2]/255, self.BorderColor[3]/255)
+            end
             love.graphics.rectangle("line", self.X, self.Y, self.W, self.H)
+
         else
             love.graphics.draw(self.Image, self.X, self.Y)
         end
+        
     end
 
     function myPanel:draw()
@@ -179,7 +194,7 @@ function Gui.newCheckbox(pX, pY, pW, pH)
 end
 
 
-function Gui.newButton(pX, pY, pW, pH, pText, pFont, pColor)
+function Gui.newButton(pX, pY, pW, pH, pText, pFont, pColor, pBackColor, data)
     local myButton = Gui.newPanel(pX, pY, pW, pH)
     myButton.Text = pText
     myButton.Font = pFont
@@ -189,6 +204,10 @@ function Gui.newButton(pX, pY, pW, pH, pText, pFont, pColor)
     myButton.imgPressed = nil
     myButton.isPressed = false
     myButton.oldButtonState = false
+    myButton.color = pColor or {255,255,255}
+    myButton.backColor = pBackColor or {255,255,255}
+    myButton.data = data or {}
+
 
     function myButton:setImages(pImageDefault, pImageHover, pImagePressed)
         self.imgDefault = pImageDefault
@@ -203,7 +222,7 @@ function Gui.newButton(pX, pY, pW, pH, pText, pFont, pColor)
         if self.isHover and love.mouse.isDown(1) and self.isPressed == false and self.oldButtonState == false then
           self.isPressed = true
           if self.lstEvents["pressed"] ~= nil then
-            self.lstEvents["pressed"]("begin")
+            self.lstEvents["pressed"]("begin",self.data)
           end
         else
           if self.isPressed == true and love.mouse.isDown(1) == false then
@@ -224,7 +243,7 @@ function Gui.newButton(pX, pY, pW, pH, pText, pFont, pColor)
         if self.isPressed then
             if self.imgPressed == nil then
                 self:drawPanel()
-                love.graphics.setColor(255,255,255,50)
+                love.graphics.setColor(myButton.backColor[1],myButton.backColor[2],myButton.backColor[3],50)
                 love.graphics.rectangle("fill", self.X, self.Y, self.W, self.H)
             else 
                 love.graphics.draw(self.imgPressed, self.X, self.Y)
@@ -232,7 +251,7 @@ function Gui.newButton(pX, pY, pW, pH, pText, pFont, pColor)
         elseif self.isHover then
             if self.imgHover == nil then
                 self:drawPanel()
-                love.graphics.setColor(255,255,255)
+                love.graphics.setColor(myButton.color[1],myButton.color[2],myButton.color[3])
                 love.graphics.rectangle("line", self.X+2, self.Y+2, self.W-4, self.H-4)
             else
                 love.graphics.draw(self.imgHover, self.X, self.Y)
